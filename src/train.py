@@ -4,3 +4,4 @@ class Train:
         self.y = y
         self.w = w
         self.h = h
+        self.velocity = 0

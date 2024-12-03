@@ -1,6 +1,7 @@
 import pygame
 from utilities import *
 from train import *
+from track import *
  
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -19,26 +20,25 @@ screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 screen = pygame.display.set_mode(screen_size)
 pygame.display.set_caption("Train Simulator - 2D")
 
-track_width = 75
-track_rail = 4
+track = Track(60, 4)
 
-train_width = track_width + (2 * track_rail)
-train_height = (train_width / 343) * 700
+train_width = track.w + (2 * track.t)
+train_height = (track.w / 343) * 700
 
-train = Train(500, 500, track_width, train_height)
+train = Train((SCREEN_WIDTH - train_width) / 2, 500, track.w, train_height)
 
-
+# Load Images
 
 train_img = loadImage("train.png", train.w, train.h)
 
-# Initialize joystick
+
 pygame.joystick.init()
 joystick = None
 if pygame.joystick.get_count() > 0:
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
-# Clock is used to set a max fps
+
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -48,28 +48,30 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     
-    # Joystick controls
+
     if joystick:
-        # Axis 0 (horizontal movement)
-        xAxis = joystick.get_axis(0)  # Returns a float between -1.0 and 1.0
+   
+        xAxis = joystick.get_axis(0)  
         yAxis = joystick.get_axis(1)
-        train.y += yAxis * 5  # Adjust speed as needed
-
-
+        train.velocity += yAxis
     
-    # Clear the screen
+    train.y += train.velocity
+    if train.velocity > 0:
+        train.velocity -= track.friction
+    elif train.velocity < 0:
+        train.velocity += track.friction
+
+
     screen.fill(GRASSGREEN)
     
-    pygame.draw.line(screen, BLACK, ((SCREEN_WIDTH - (track_width + (track_rail * 2))) / 2, 0), ((SCREEN_WIDTH - (track_width + (track_rail * 2))) / 2, SCREEN_HEIGHT), track_rail)
-    pygame.draw.line(screen, BLACK, (((SCREEN_WIDTH - (track_width + (track_rail * 2))) / 2) + track_width, 0), (((SCREEN_WIDTH - (track_width + (track_rail * 2))) / 2) + track_width, SCREEN_HEIGHT), track_rail)
+    pygame.draw.line(screen, BLACK, ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, 0), ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, SCREEN_HEIGHT), track.t)
+    pygame.draw.line(screen, BLACK, (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, 0), (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, SCREEN_HEIGHT), track.t)
 
-    # Draw the train
+
     screen.blit(train_img, (train.x, train.y))
     
-    # Flip the display
     pygame.display.flip()
      
-    # How many updates per second
     clock.tick(FPS)
  
 pygame.quit()
