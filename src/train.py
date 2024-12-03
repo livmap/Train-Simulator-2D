@@ -5,3 +5,4 @@ class Train:
         self.w = w
         self.h = h
         self.velocity = 0
+        self.maxVelocity = 0

@@ -1,4 +1,7 @@
 import pygame
+import math
+import random
+
 from utilities import *
 from train import *
 from track import *
@@ -7,7 +10,33 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GRASSGREEN = (0, 255, 100)
- 
+DIRTBROWN = (150, 75, 0)
+
+world = []
+
+for x in range(70):
+    world.append([])
+
+for x in range(70):
+    for y in range(100):
+        num = random.randint(0,1)
+        block = None
+
+        if num == 0:
+            block = "GRASS"
+        else:
+            block = "DIRT"
+
+        world[x ].append(block)
+
+def drawWorld():
+    for x in range(70):
+        for y in range(100):
+            if world[x ][y ] == "GRASS":
+                pygame.draw.rect(screen, GRASSGREEN, ((y ) * 10, (x ) * 10, 10, 10))
+            elif world[x ][y ] == "DIRT":
+                pygame.draw.rect(screen, DIRTBROWN, ((y ) * 10, (x ) * 10, 10, 10))
+
 # Initialize pygame
 pygame.init()
 
@@ -41,6 +70,11 @@ if pygame.joystick.get_count() > 0:
 
 clock = pygame.time.Clock()
 FPS = 60
+count = 0
+ticker = 0
+
+font = pygame.font.Font(None, 36)
+
 
 running = True
 while running:
@@ -53,24 +87,49 @@ while running:
    
         xAxis = joystick.get_axis(0)  
         yAxis = joystick.get_axis(1)
-        train.velocity += yAxis
+        train.velocity += yAxis / 10
     
-    train.y += train.velocity
+    if train.y > 300:
+        train.y += train.velocity
     if train.velocity > 0:
         train.velocity -= track.friction
     elif train.velocity < 0:
         train.velocity += track.friction
 
+    if train.velocity < 0:
+        count -= train.velocity
+        number = int(count  / 100) 
+        
+        if number != ticker:
+            del world[-1]
+            newLine = []
+            for x in range(100):
+                num = random.randint(0,1)
+                block = None
+
+                if num == 0:
+                    block = "GRASS"
+                else:
+                    block = "DIRT"
+
+                newLine.append(block)
+
+            world.insert(0, newLine)
+            ticker = number
 
     screen.fill(GRASSGREEN)
-    
+    drawWorld()
     pygame.draw.line(screen, BLACK, ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, 0), ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, SCREEN_HEIGHT), track.t)
     pygame.draw.line(screen, BLACK, (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, 0), (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, SCREEN_HEIGHT), track.t)
 
+    text_surface = font.render("VELOCITY: " + str(int(train.velocity)), True, BLACK)
+    screen.blit(text_surface, (10, 10))
 
     screen.blit(train_img, (train.x, train.y))
     
     pygame.display.flip()
+
+    
      
     clock.tick(FPS)
  
