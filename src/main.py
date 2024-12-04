@@ -9,7 +9,7 @@ from track import *
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-GRASSGREEN = (0, 255, 100)
+GRASSGREEN = (0, 255 * 0.1, 100 * 0.1)
 DIRTBROWN = (150, 75, 0)
 
 world = []
@@ -28,6 +28,8 @@ for x in range(70):
             block = "DIRT"
 
         world[x ].append(block)
+
+
 
 def drawWorld():
     for x in range(70):
@@ -75,6 +77,9 @@ ticker = 0
 
 font = pygame.font.Font(None, 36)
 
+lt = 0
+rt = 0
+
 
 running = True
 while running:
@@ -87,14 +92,22 @@ while running:
    
         xAxis = joystick.get_axis(0)  
         yAxis = joystick.get_axis(1)
+        lt = joystick.get_axis(2)
+        rt = joystick.get_axis(5)
+
         train.velocity += yAxis / 10
     
     if train.y > 300:
         train.y += train.velocity
     if train.velocity > 0:
         train.velocity -= track.friction
+        train.velocity -= 0.295 * (math.pow(train.velocity, 2)) * 1.1125 * (0.0001)
+            
     elif train.velocity < 0:
         train.velocity += track.friction
+        train.velocity += 0.295 * (math.pow(train.velocity, 2)) * 1.1125 * (0.0001)
+ 
+            
 
     if train.velocity < 0:
         count -= train.velocity
@@ -117,12 +130,13 @@ while running:
             world.insert(0, newLine)
             ticker = number
 
-    screen.fill(GRASSGREEN)
+    #screen.fill(GRASSGREEN)
+    
     drawWorld()
     pygame.draw.line(screen, BLACK, ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, 0), ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, SCREEN_HEIGHT), track.t)
-    pygame.draw.line(screen, BLACK, (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, 0), (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, SCREEN_HEIGHT), track.t)
+    pygame.draw.line(screen, BLACK, (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, 0), (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, SCREEN_HEIGHT), track.t)    
 
-    text_surface = font.render("VELOCITY: " + str(int(train.velocity)), True, BLACK)
+    text_surface = font.render("VELOCITY: " + str(-1 * int(train.velocity)) + " KM/H", True, BLACK)
     screen.blit(text_surface, (10, 10))
 
     screen.blit(train_img, (train.x, train.y))

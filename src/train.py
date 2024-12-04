@@ -6,3 +6,5 @@ class Train:
         self.h = h
         self.velocity = 0
         self.maxVelocity = 0
+        self.frontalArea = self.w * (2 * self.w)
+        self.dragCoefficient = 0.295
