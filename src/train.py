@@ -8,3 +8,4 @@ class Train:
         self.maxVelocity = 0
         self.frontalArea = self.w * (2 * self.w)
         self.dragCoefficient = 0.295
+        self.dangerThrottle = 87

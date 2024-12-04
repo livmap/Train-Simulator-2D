@@ -9,7 +9,7 @@ from track import *
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-GRASSGREEN = (0, 255 * 0.1, 100 * 0.1)
+GRASSGREEN = (0, 200, 100)
 DIRTBROWN = (150, 75, 0)
 
 world = []
@@ -79,6 +79,8 @@ font = pygame.font.Font(None, 36)
 
 lt = 0
 rt = 0
+yAxis = 0
+xAxis = 0
 
 
 running = True
@@ -95,17 +97,17 @@ while running:
         lt = joystick.get_axis(2)
         rt = joystick.get_axis(5)
 
-        train.velocity += yAxis / 10
+        train.velocity += yAxis / 50
     
     if train.y > 300:
         train.y += train.velocity
     if train.velocity > 0:
         train.velocity -= track.friction
-        train.velocity -= 0.295 * (math.pow(train.velocity, 2)) * 1.1125 * (0.0001)
+        train.velocity -= 0.295 * (math.pow(train.velocity, 2)) * 1.1125 * (0.00001)
             
     elif train.velocity < 0:
         train.velocity += track.friction
-        train.velocity += 0.295 * (math.pow(train.velocity, 2)) * 1.1125 * (0.0001)
+        train.velocity += 0.295 * (math.pow(train.velocity, 2)) * 1.1125 * (0.00001)
  
             
 
@@ -136,8 +138,15 @@ while running:
     pygame.draw.line(screen, BLACK, ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, 0), ((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2, SCREEN_HEIGHT), track.t)
     pygame.draw.line(screen, BLACK, (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, 0), (((SCREEN_WIDTH - (track.w + (track.t * 2))) / 2) + track.w, SCREEN_HEIGHT), track.t)    
 
-    text_surface = font.render("VELOCITY: " + str(-1 * int(train.velocity)) + " KM/H", True, BLACK)
-    screen.blit(text_surface, (10, 10))
+    velocity_text = font.render("VELOCITY: " + str(-1 * int(train.velocity)) + " KM/H", True, BLACK)
+    throttle_text = None
+    if -1 * int(yAxis * 100) > train.dangerThrottle:
+        throttle_text = font.render("THROTTLE: " + str(-1 * int(yAxis * 100)) + " %", True, RED)
+    else:
+        throttle_text = font.render("THROTTLE: " + str(-1 * int(yAxis * 100)) + " %", True, BLACK)
+
+    screen.blit(velocity_text, (10, 10))
+    screen.blit(throttle_text, (10, 30))
 
     screen.blit(train_img, (train.x, train.y))
     
