@@ -19,7 +19,7 @@ class InterChange(Track):
             self.endX = self.x + self.xChange
             self.endY = self.y - self.yChange
         elif self.angle > 90:
-            self.angle = self.angle - 90
+            self.angle = 180 - self.angle
             self.yChange = -math.tan(self.angle * (math.pi / 180)) * self.xChange
             self.endX = self.x - self.xChange
             self.endY = self.y + self.yChange

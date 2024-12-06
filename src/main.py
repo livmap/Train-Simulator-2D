@@ -78,6 +78,13 @@ for x in range(len(railNetwork) - 1, len(railNetwork) - 1 + 15):
 
 numRails = len(railNetwork)
 
+interItem = InterChange(railNetwork[numRails - 1].endX, railNetwork[numRails - 1].endY, track_width, track_thick, 120, 250)
+interItem2 = InterChange(railNetwork[numRails - 1].endX + track_width, railNetwork[numRails - 1].endY, track_width, track_thick, 120, 250)
+railNetwork.append(interItem)
+railNetwork2.append(interItem2)
+
+numRails = len(railNetwork)
+
 for x in range(70):
     world.append([])
 
@@ -132,6 +139,7 @@ xAxis = 0
 
 renderYMove = 0
 xShift = 0
+x_shift_init = 0
 overInterChange = False
 
 running = True
@@ -227,8 +235,9 @@ while running:
     if overInterChange:
         gradient = ( currentRail.y - currentRail.endY ) / ( currentRail.endX - currentRail.x )
         yChange = (currentRail.y - renderYMove) - (train.y + (train.h / 2))
-        xShift = -(yChange / gradient)
-        print(xShift)
+        xShift = x_shift_init -(yChange / gradient)
+    else:
+        x_shift_init = xShift
 
     velocity_text = font.render("VELOCITY: " + str(-1 * int(train.velocity)) + " KM/H", True, BLACK)
     throttle_text = None
