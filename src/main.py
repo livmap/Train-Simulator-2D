@@ -6,6 +6,7 @@ from utilities import *
 from train import *
 from track import *
 from interChange import *
+from terrainItem import *
 
 
 pygame.init()
@@ -24,10 +25,9 @@ RED = (255, 0, 0)
 GRASSGREEN = (0, 200, 100)
 DIRTBROWN = (150, 75, 0)
 
-world = []
 railNetwork = []
 railNetwork2 = []
-
+terrainItems = []
 
 departure = (0, 0)
 arrival = (150, 2000)
@@ -40,6 +40,94 @@ track_thick = 4
 
 track_x_init = ((SCREEN_WIDTH - track_width) / 2) - track_thick
 
+randomStartNum = random.randint(10, 20)
+
+bushDiameter = 60
+rockDiameter = 30
+treeDiameter = 120
+
+Bush1 = loadImage("Bush1.png", bushDiameter, bushDiameter)
+Bush2 = loadImage("Bush2.png", bushDiameter, bushDiameter)
+Rock1 = loadImage("Rock1.png", rockDiameter, rockDiameter)
+Rock2 = loadImage("Rock2.png", rockDiameter, rockDiameter)
+Rock3 = loadImage("Rock3.png", rockDiameter, rockDiameter)
+Tree1 = loadImage("Tree1.png", treeDiameter, treeDiameter)
+Tree2 = loadImage("Tree2.png", treeDiameter, treeDiameter)
+
+for x in range(randomStartNum):
+    typeItem = None
+    randomType = random.randint(1, 3)
+    randomVariant = None
+    terrainItem = None
+    
+    if randomType == 1:
+        typeItem = "BUSH"
+        randomVariant = random.randint(1, 2)
+        terrainItem = TerrainItem(typeItem, randomVariant,random.randint(1, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 60, 60)
+
+        for x in terrainItems:
+            while distance(x.x, x.y, x.w, x.h, terrainItem.x, terrainItem.y, terrainItem.w, terrainItem.h) < 150:
+                terrainItem = TerrainItem(typeItem, randomVariant,random.randint(1, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 60, 60)
+
+    elif randomType == 2:
+        typeItem = "ROCK"
+        randomVariant = random.randint(1, 3)
+        terrainItem = TerrainItem(typeItem, randomVariant,random.randint(1, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 200, 200)
+
+        for x in terrainItems:
+            while distance(x.x, x.y, x.w, x.h, terrainItem.x, terrainItem.y, terrainItem.w, terrainItem.h) < 150:
+                terrainItem = TerrainItem(typeItem, randomVariant,random.randint(1, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 60, 60)
+    else:
+        typeItem = "TREE"
+        randomVariant = random.randint(1, 2)
+        terrainItem = TerrainItem(typeItem, randomVariant,random.randint(1, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30, 30)
+
+        for x in terrainItems:
+            while distance(x.x, x.y, x.w, x.h, terrainItem.x, terrainItem.y, terrainItem.w, terrainItem.h) < 150:
+                terrainItem = TerrainItem(typeItem, randomVariant,random.randint(1, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 60, 60)
+
+    terrainItems.append(terrainItem)
+
+
+def filterTerrain(xS):
+    for x in terrainItems:
+        if x.y > SCREEN_HEIGHT + 50:
+            x.y = -250
+            x.x = random.randint(1, SCREEN_WIDTH)
+            for y in terrainItems:
+                if y != x:
+                    while distance(x.x, x.y, x.w, x.h, y.x, y.y, y.w, y.h) < 150:
+                        x.x = random.randint(1, SCREEN_WIDTH)
+
+        if x.x + xS > SCREEN_WIDTH + 150:
+            x.x = -100
+        elif x.x + xS < -150:
+            x.x = SCREEN_WIDTH + 100
+
+def drawTerrain(xS):
+
+    for x in terrainItems:
+        if x.type == "BUSH":
+            if x.variant == 1:
+                screen.blit(Bush1, (x.x + xS, x.y))
+            else:
+                screen.blit(Bush2, (x.x + xS, x.y))
+        elif x.type == "ROCK":
+            if x.variant == 1:
+                screen.blit(Rock1, (x.x + xS, x.y))
+            elif x.variant == 2:
+                screen.blit(Rock2, (x.x + xS, x.y))
+            else:
+                screen.blit(Rock3, (x.x + xS, x.y))
+        else:
+            if x.variant == 1:
+                screen.blit(Tree1, (x.x + xS, x.y))
+            else:
+                screen.blit(Tree2, (x.x + xS, x.y))
+
+def moveTerrain(yMove):
+    for x in terrainItems:
+        x.y -= yMove / 5
 
 for x in range(15):
     if x == 0:
@@ -85,29 +173,6 @@ railNetwork2.append(interItem2)
 
 numRails = len(railNetwork)
 
-for x in range(70):
-    world.append([])
-
-for x in range(70):
-    for y in range(100):
-        num = random.randint(0,1)
-        block = None
-
-        if num == 0:
-            block = "GRASS"
-        else:
-            block = "DIRT"
-
-        world[x ].append(block)
-
-def drawWorld():
-    for x in range(70):
-        for y in range(100):
-            if world[x ][y ] == "GRASS":
-                pygame.draw.rect(screen, GRASSGREEN, ((y ) * 10, (x ) * 10, 10, 10))
-            elif world[x ][y ] == "DIRT":
-                pygame.draw.rect(screen, DIRTBROWN, ((y ) * 10, (x ) * 10, 10, 10))
-
 track = railNetwork[0]
 
 train_width = track.w + (2 * track.t)
@@ -142,6 +207,7 @@ xShift = 0
 x_shift_init = 0
 overInterChange = False
 
+
 running = True
 
 while running:
@@ -152,6 +218,7 @@ while running:
     lastRail = None
     currentRail = None
     
+    pygame.draw.rect(screen, DIRTBROWN, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
 
     for x in range(numRails):
         if railNetwork[x].y >= renderYMove and railNetwork[x].endY < renderYMove:
@@ -178,6 +245,8 @@ while running:
     h = 0
     startIndex = 0
 
+    #drawWorld(-1 * renderYMove)
+
     while h < SCREEN_HEIGHT and startIndex >= 0:
         h += railNetwork[index].yChange
         startIndex -= index
@@ -186,15 +255,14 @@ while running:
    
         xAxis = joystick.get_axis(0)  
         yAxis = joystick.get_axis(1)
-        lt = joystick.get_axis(2)
-        rt = joystick.get_axis(5)
 
         train.velocity += yAxis / 50
     
     if train.y > 300:
         train.y += train.velocity
     else:
-        renderYMove += train.velocity
+        renderYMove += train.velocity / 5
+        moveTerrain(train.velocity)
         
     if train.velocity > 0:
         train.velocity -= track.friction
@@ -208,25 +276,6 @@ while running:
         count -= train.velocity
         number = int(count  / 100) 
         
-        if number != ticker:
-            del world[-1]
-            newLine = []
-            for x in range(100):
-                num = random.randint(0,1)
-                block = None
-
-                if num == 0:
-                    block = "GRASS"
-                else:
-                    block = "DIRT"
-
-                newLine.append(block)
-
-            world.insert(0, newLine)
-            ticker = number
-    
-    drawWorld()
-
     for x in range(startIndex, index + 1):
         
         pygame.draw.line(screen, BLACK, (railNetwork[x].x + xShift, railNetwork[x].y - renderYMove), (railNetwork[x].endX + xShift, railNetwork[x].endY - renderYMove), railNetwork[x].t)
@@ -235,7 +284,8 @@ while running:
     if overInterChange:
         gradient = ( currentRail.y - currentRail.endY ) / ( currentRail.endX - currentRail.x )
         yChange = (currentRail.y - renderYMove) - (train.y + (train.h / 2))
-        xShift = x_shift_init -(yChange / gradient)
+        xShift = x_shift_init - (yChange / gradient)
+
     else:
         x_shift_init = xShift
 
@@ -251,6 +301,9 @@ while running:
         throttle_text = font.render("BRAKES ENGAGED", True, RED) 
 
     distance_text = font.render("DISTANCE: " + str(int(count * (1 / 360))) + " M", True, BLACK)
+
+    filterTerrain(xShift)
+    drawTerrain(xShift)
 
     screen.blit(velocity_text, (10, 10))
     screen.blit(throttle_text, (10, 30))
