@@ -24,4 +24,7 @@ class InterChange(Track):
             self.endX = self.x - self.xChange
             self.endY = self.y + self.yChange
 
+        # 40 at 30
+        self.maxVeloc = 40 + ((self.angle - 30))
+
         
